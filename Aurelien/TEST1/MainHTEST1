@@ -13,7 +13,7 @@
 
 /* Déclaration des fonctions*/
 void execute_command(char *input);
-void read_input(char *input);
+
 int check_command_exists(char *command);
 void handle_exit();
 
