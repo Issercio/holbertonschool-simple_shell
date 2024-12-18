@@ -1,91 +1,69 @@
 #include "simple_shell.h"
 
 /**
- * parse_args - Divise la chaîne de commande en un tableau d'arguments
- * @cmd: La chaîne de commande d'entrée
- *
- * Return: Un tableau dynamiquement alloué d'arguments. Le tableau est null-terminé.
- */
-char **parse_args(char *cmd)
+* parse_args - Divise une ligne de commande en mots.
+* @line: La ligne de commande entrée par l'utilisateur.
+*
+* Retourne un tableau de chaînes de caractères représentant les arguments.
+*
+* Retour: Un tableau de chaînes de caractères (arguments) ou NULL si échec.
+*/
+char **parse_args(char *line)
 {
-    char **args;
-    char *token;
-    int i = 0;
+	char **args = malloc(sizeof(char *) * 64); /* Allocation d'un tableau */
 
-    args = malloc(MAX_ARGS * sizeof(char *));
-    if (args == NULL)
-    {
-        perror("malloc");
-        exit(1);
-    }
+	int i = 0;
 
-    /* Divise la chaîne de commande en tokens */
-    token = strtok(cmd, " ");
-    while (token != NULL)
-    {
-        args[i] = token;
-        i++;
-        token = strtok(NULL, " ");
-    }
-    args[i] = NULL; /* Null-terminer la liste des arguments */
-    return (args);
+	if (!args)
+	{
+		perror("malloc failed");
+		exit(1);
+	}
+
+	/* Diviser la ligne en arguments à l'aide de strtok() */
+	char *token = strtok(line, " ");
+
+	while (token != NULL)
+	{
+		args[i] = token;
+		i++;
+		token = strtok(NULL, " ");
+	}
+	args[i] = NULL; /* Marquer la fin de la liste des arguments */
+
+	return (args); /* Parenthèses ajoutées */
 }
 
 /**
- * command_exists - Vérifie si une commande existe dans les répertoires listés dans PATH
- * @cmd: La commande à rechercher
- *
- * Return: 1 si la commande existe dans le PATH, 0 sinon
- */
-int command_exists(char *cmd)
+* command_exists - Vérifie si une commande existe dans le répertoire actuel.
+* @command: Le nom de la commande à vérifier.
+*
+* Retourne 1 si la commande existe, 0 sinon.
+*
+* Retour: 1 si la commande existe, sinon 0.
+*/
+int command_exists(char *command)
 {
-    char *path;
-    char *path_copy;
-    char *dir;
-    char full_cmd[MAX_CMD_LENGTH];
-
-    path = getenv("PATH");
-    if (!path)
-    {
-        return (0); /* Si PATH n'est pas défini, on suppose que la commande n'existe pas */
-    }
-
-    path_copy = strdup(path);
-    if (path_copy == NULL)
-    {
-        perror("strdup");
-        return (0);
-    }
-
-    dir = strtok(path_copy, ":");
-
-    /* Essayer chaque répertoire dans PATH */
-    while (dir != NULL)
-    {
-        snprintf(full_cmd, sizeof(full_cmd), "%s/%s", dir, cmd);
-
-        if (access(full_cmd, X_OK) == 0)
-        {
-            free(path_copy);
-            return (1); /* Commande trouvée et exécutable */
-        }
-        dir = strtok(NULL, ":");
-    }
-
-    free(path_copy);
-    return (0); /* Commande non trouvée dans aucun répertoire de PATH */
+	if (access(command, X_OK) == 0)
+		return (1); /* Parenthèses ajoutées */
+	return (0); /* Parenthèses ajoutées */
 }
 
 /**
- * print_env - Affiche toutes les variables d'environnement
- */
+* print_env - Affiche les variables d'environnement.
+*
+* Cette fonction parcourt et affiche toutes les variables d'environnement.
+*/
 void print_env(void)
 {
-    int i;
+	/* Déplacer cette ligne dans simple_shell.h */
+	/* extern char **environ; */
 
-    /* Affiche toutes les variables d'environnement */
-    for (i = 0; environ[i] != NULL; i++)
-    {
-        printf("%s\n", environ[i]);
-    }
+	int i = 0;
+
+	while (environ[i] != NULL)
+	{
+		printf("%s\n", environ[i]);
+		i++;
+	}
 }

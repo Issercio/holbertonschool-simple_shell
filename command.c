@@ -1,76 +1,65 @@
 #include "simple_shell.h"
 
 /**
- * execute_command - Exécute la commande donnée
- * @cmd: La chaîne de caractères représentant la commande
- *
- * Cette fonction crée un processus enfant pour exécuter la commande donnée.
- * Si la commande est `exit`, le shell se termine.
- * Si la commande est `env`, les variables d'environnement sont affichées.
- * Si la commande est trouvée, elle est exécutée, sinon une erreur est affichée.
- */
-void execute_command(char *cmd)
+* execute_command - Exécute la commande entrée par l'utilisateur.
+* @command: La commande à exécuter.
+*
+* Retourne 0 si la commande est exécutée avec succès, sinon -1.
+*/
+int execute_command(char *command)
 {
-    pid_t pid;
-    char **args;
+	char *args[] = {command, NULL};  /* Initialisation des arguments */
 
-    /* Vérifie si l'utilisateur a entré la commande "exit" */
-    if (strcmp(cmd, "exit") == 0)
-    {
-        exit(0); /* Quitte le shell */
-    }
+	pid_t pid;
+	int status;
 
-    /* Vérifie si l'utilisateur a entré la commande "env" */
-    if (strcmp(cmd, "env") == 0)
-    {
-        /* Affiche toutes les variables d'environnement */
-        print_env();
-        return;
-    }
+	if (command == NULL)
+	{
+		return (-1);
+	}
 
-    pid = fork(); /* Crée un processus enfant */
-    if (pid == -1)
-    {
-        perror("Erreur lors du fork"); /* Erreur de fork */
-        return;
-    }
+	pid = fork();  /* Créer un processus fils */
 
-    if (pid == 0) /* Processus enfant */
-    {
-        args = parse_args(cmd); /* Analyse la ligne de commande en arguments */
+	if (pid == -1)  /* Vérifier l'échec du fork */
+	{
+		perror("fork");
+		return (-1);
+	}
 
-        if (command_exists(args[0])) /* Si la commande est dans PATH */
-        {
-            char *path = getenv("PATH");
-            char *path_copy = strdup(path);
-            char *dir = strtok(path_copy, ":");
-            char full_cmd[MAX_CMD_LENGTH];
+	if (pid == 0)  /* Si c'est le processus fils */
+	{
+		if (execvp(command, args) == -1)  /* Exécuter la commande */
+		{
+			perror("execvp");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else  /* Si c'est le processus parent */
+	{
+		wait(&status);  /* Attendre que le processus fils se termine */
+	}
 
-            /* Essayer chaque répertoire dans PATH */
-            while (dir != NULL)
-            {
-                snprintf(full_cmd, sizeof(full_cmd), "%s/%s", dir, args[0]);
+	return (0);
+}
 
-                if (execve(full_cmd, args, environ) == -1) /* Essayer d'exécuter la commande */
-                {
-                    dir = strtok(NULL, ":");
-                    continue;
-                }
-            }
+/**
+* parse_command - Analyse la commande et vérifie sa validité.
+* @input: Entrée de l'utilisateur.
+*
+* Retourne 1 si la commande est valide, sinon 0.
+*/
+int parse_command(char *input)
+{
+	if (input == NULL || *input == '\0')
+	{
+		return (0);  /* Commande vide */
+	}
 
-            /* Si la commande n'a pas été trouvée, afficher une erreur */
-            perror(args[0]);
-            exit(1);
-        }
-        else
-        {
-            /* Commande non trouvée ou non exécutable */
-            perror(args[0]);
-            exit(1);
-        }
-    }
-    else /* Processus parent */
-    {
-        wait(NULL); /* Attendre la fin du processus enfant */
-    }
+	if (strchr(input, ';') != NULL)
+	{
+		write(STDOUT_FILENO, "Semicolon is not allowed in the command.\n", 41);
+		return (0);  /* Interdiction des points-virgules */
+	}
+
+	return (1);  /* Commande valide */
 }
