@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include "simple_shell.h"
 
 /**
 * parse_args - Splits a command into arguments.

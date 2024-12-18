@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "simple_shell.h"
 
 /**
 * execute_command - Executes a given command.
