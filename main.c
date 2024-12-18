@@ -1,91 +1,103 @@
-#include "simple_shell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /**
- * display_prompt - Affiche le prompt de commande.
- */
-void display_prompt(void)
+* read_command - Reads a command from user input.
+*
+* @command: A pointer to a string where the command will be stored.
+*
+* This function prompts the user for a command and reads it using the
+* `getline` function. It handles the case when the user inputs EOF (Ctrl+D).
+*
+* Return: The number of characters read, or -1 if there is an error.
+*/
+ssize_t read_command(char **command)
 {
-	write(STDOUT_FILENO, "#cisfun$ ", 9);
-}
+	size_t len = 0;
+	ssize_t nread;
 
-/**
- * read_command - Lit une ligne de commande de l'entrée standard.
- * @line: Pointeur vers la ligne lue.
- * @len: Taille de la ligne.
- *
- * Retourne le nombre de caractères lus ou -1 en cas d'erreur.
- */
-ssize_t read_command(char **line, size_t *len)
-{
-	ssize_t nread = getline(line, len, stdin);
-
-	if (nread == -1) /* Gérer l'erreur EOF ou erreur de lecture */
+	nread = getline(command, &len, stdin);
+	if (nread == -1)  /* Check for end-of-file (Ctrl+D) or error */
 	{
-		if (feof(stdin)) /* Gestion EOF (Ctrl+D) */
+		if (feof(stdin))  /* End of file */
 		{
-			write(STDOUT_FILENO, "\n", 1);
+			printf("\n");
+			exit(0);  /* Exit the shell if EOF is detected */
 		}
 		else
 		{
 			perror("getline");
+			return (-1);  /* Error reading input */
 		}
 	}
 
-	return (nread);
+	return (nread);  /* Return number of bytes read */
 }
 
 /**
- * process_command - Traite et exécute la commande.
- * @line: Ligne de commande entrée.
- */
-void process_command(char *line)
+* process_command - Processes and executes the user input command.
+*
+* @command: The command entered by the user.
+*
+* This function handles the logic of executing the command entered by the
+* user. If the command is found, it is executed; otherwise, an error message
+* is displayed.
+*
+* Return: 0 on success, or -1 if an error occurs during execution.
+*/
+int process_command(char *command)
 {
-	if (line == NULL)
-		return;
+	pid_t pid = fork();  /* Create a child process */
 
-	line[strcspn(line, "\n")] = '\0'; /* Supprimer le saut de ligne */
-
-	/* Exécuter la commande */
-	if (command_exists(line))
+	if (pid == -1)
 	{
-		if (fork() == 0) /* Processus enfant */
+		perror("fork");
+		return (-1);  /* Error forking the process */
+	}
+
+	if (pid == 0)  /* Child process */
+	{
+		if (execve(command, NULL, NULL) == -1)  /* Attempt to execute command */
 		{
-			if (execve(line, &line, environ) == -1)
-			{
-				perror(line);
-			}
-			exit(1);
+			perror(command);  /* Print error if command fails */
+			exit(EXIT_FAILURE);  /* Exit child process on failure */
 		}
-		wait(NULL); /* Attendre que le processus enfant termine */
 	}
-	else
-	{
-		write(STDOUT_FILENO, "Command not found\n", 18);
-	}
+	wait(NULL);  /* Parent process waits for child to finish */
+	return (0);  /* Command executed successfully */
 }
 
 /**
- * main - Fonction principale du shell.
- *
- * Retourne 0 si tout va bien.
- */
+* main - The entry point of the shell program.
+*
+* The `main` function continuously displays a prompt, reads the user's input,
+* and processes the command.
+* The program loops until the user exits (Ctrl+D or "exit").
+*
+* Return: Always 0.
+*/
 int main(void)
 {
-	char *line = NULL;
-	size_t len = 0;
+	char *command = NULL;
+
 	ssize_t nread;
 
 	while (1)
 	{
-		display_prompt(); /* Afficher le prompt */
+		printf("#cisfun$ ");
+		nread = read_command(&command);  /* Read user command */
+		if (nread == -1)  /* Check if error occurred */
+			continue;
 
-		nread = read_command(&line, &len); /* Lire la commande */
-		if (nread == -1)
-			break;
+		command[strcspn(command, "\n")] = '\0';  /* Remove newline from command */
+		if (command[0] == '\0')  /* Ignore empty commands */
+			continue;
 
-		process_command(line); /* Traiter la commande */
+		process_command(command);  /* Process and execute the command */
 	}
 
-	free(line); /* Libérer la mémoire allouée pour la ligne */
-	return (0);
+	free(command);  /* Free memory allocated for command */
+	return (0);  /* Exit the program */
 }

@@ -1,65 +1,69 @@
 #include "simple_shell.h"
 
 /**
-* execute_command - Exécute la commande entrée par l'utilisateur.
-* @command: La commande à exécuter.
-*
-* Retourne 0 si la commande est exécutée avec succès, sinon -1.
-*/
+ * execute_command - Executes the parsed command by creating a child process.
+ *
+ * @command: The command string to be executed.
+ *
+ * This function attempts to execute the provided command using `execve`. It
+ * creates a new process using `fork`. The child process calls `execve` to
+ * execute the command, and if execution fails,
+ * it will display an error message.
+ *
+ * Return: 0 on success, or -1
+ * if an error occurs during execution (e.g., command not found).
+ */
 int execute_command(char *command)
 {
-	char *args[] = {command, NULL};  /* Initialisation des arguments */
+	pid_t pid = fork();  /* Create a child process */
 
-	pid_t pid;
-	int status;
-
-	if (command == NULL)
-	{
-		return (-1);
-	}
-
-	pid = fork();  /* Créer un processus fils */
-
-	if (pid == -1)  /* Vérifier l'échec du fork */
+	if (pid == -1)  /* Error creating process */
 	{
 		perror("fork");
 		return (-1);
 	}
 
-	if (pid == 0)  /* Si c'est le processus fils */
+	if (pid == 0)  /* In the child process */
 	{
-		if (execvp(command, args) == -1)  /* Exécuter la commande */
+		if (execve(command, NULL, NULL) == -1)  /* Execute the command */
 		{
-			perror("execvp");
-			exit(EXIT_FAILURE);
+			perror(command);  /* If execution fails, print error */
+			exit(EXIT_FAILURE);  /* Exit child process on error */
 		}
 	}
-	else  /* Si c'est le processus parent */
-	{
-		wait(&status);  /* Attendre que le processus fils se termine */
-	}
 
-	return (0);
+	wait(NULL);  /* Parent waits for the child process to finish */
+	return (0);  /* Command executed successfully */
 }
 
 /**
-* parse_command - Analyse la commande et vérifie sa validité.
-* @input: Entrée de l'utilisateur.
-*
-* Retourne 1 si la commande est valide, sinon 0.
-*/
-int parse_command(char *input)
+ * parse_command - Parses the user input to determine the command to execute.
+ *
+ * @input: The raw input string entered by the user.
+ *
+ * This function processes the raw input string to determine the appropriate
+ * command. It may involve trimming whitespace, tokenizing the string,
+ * or other operations needed to prepare the command for execution.
+ *
+ * Return: A string representing the parsed command, or NULL if parsing fails.
+ */
+char *parse_command(char *input)
 {
-	if (input == NULL || *input == '\0')
+	char *command = NULL;
+
+	if (input == NULL)  /* Check for NULL input */
 	{
-		return (0);  /* Commande vide */
+		fprintf(stderr, "Error: No command entered\n");
+		return (NULL);
 	}
 
-	if (strchr(input, ';') != NULL)
+	command = strtok(input, " \t\n");  /* Tokenize the input to get the command */
+
+	if (command == NULL)  /* Check if the input is empty or invalid */
 	{
-		write(STDOUT_FILENO, "Semicolon is not allowed in the command.\n", 41);
-		return (0);  /* Interdiction des points-virgules */
+		fprintf(stderr, "Error: Invalid command\n");
+		return (NULL);
 	}
 
-	return (1);  /* Commande valide */
+	return (command);  /* Return the parsed command */
 }
