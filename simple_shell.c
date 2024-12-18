@@ -2,57 +2,82 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/wait.h>  // Include this header for the wait function
+#include <sys/wait.h>
 
 #define MAX_CMD_LENGTH 1024
 
-// Function to execute a command
-void execute_command(char *cmd) {
-    pid_t pid = fork();  // Create a child process
+/**
+ * execute_command - Executes a command entered by the user.
+ * @cmd: A string containing the command to execute.
+ * 
+ * This function forks a child process to execute the given command. If the 
+ * command is successful, it will be executed in the child process. The parent
+ * process waits for the child to complete.
+ */
+void execute_command(char *cmd)
+{
+    pid_t pid = fork();
 
     if (pid == -1) {
-        // Error forking
         perror("Fork failed");
         return;
     }
 
     if (pid == 0) {
-        // Child process: Try to execute the command
-        if (execve(cmd, (char *[]){cmd, NULL}, NULL) == -1) {
-            // If execve fails, print an error message
-            perror(cmd);
+        /* Child process */
+        char *args[MAX_CMD_LENGTH];
+        char *token = strtok(cmd, " ");
+        int i = 0;
+
+        /* Tokenize the command string into arguments */
+        while (token != NULL) {
+            args[i++] = token;
+            token = strtok(NULL, " ");
+        }
+        args[i] = NULL;  /* Null-terminate the argument list */
+
+        if (execvp(args[0], args) == -1) {
+            perror(cmd);  /* Print error if execvp fails */
             exit(1);
         }
     } else {
-        // Parent process: Wait for the child to finish
-        wait(NULL);  // This line requires sys/wait.h
+        /* Parent process */
+        wait(NULL);  /* Wait for child process to complete */
     }
 }
 
-int main(void) {
+/**
+ * main - Main function for the shell program.
+ * 
+ * This function runs a simple shell that continuously prompts the user for
+ * a command, reads the input, and executes the command in a new process.
+ * The loop continues until the user exits the shell.
+ * 
+ * Return: Always 0.
+ */
+int main(void)
+{
     char cmd[MAX_CMD_LENGTH];
 
-    // Shell prompt loop
     while (1) {
-        // Display the prompt
+        /* Print the prompt */
         printf("#cisfun$ ");
-        
-        // Read user input
+
+        /* Read the user input */
         if (fgets(cmd, MAX_CMD_LENGTH, stdin) == NULL) {
-            // End of file (Ctrl+D) condition
             printf("\n");
-            exit(0);
+            exit(0);  /* Exit on EOF (Ctrl+D) */
         }
 
-        // Remove the newline character from the input (if any)
+        /* Remove the trailing newline character from the input */
         cmd[strcspn(cmd, "\n")] = 0;
 
-        // Check if the command is empty
+        /* If the user entered an empty command, skip it */
         if (strlen(cmd) == 0) {
-            continue; // Ignore empty commands
+            continue;
         }
 
-        // Try to execute the command
+        /* Execute the command */
         execute_command(cmd);
     }
 
