@@ -33,9 +33,11 @@ void execute_command(char *command)
 		argv[0] = command;
 		argv[1] = NULL;  /* No arguments */
 
-		if (execve(command, argv, NULL) == -1)  /* Execute the command */
+		/* Try executing command with absolute path first */
+		if (execve(command, argv, NULL) == -1)
 		{
-			handle_error(command);  /* Handle errors */
+			/* If the command is not found, print error */
+			handle_error(command);
 		}
 		exit(EXIT_FAILURE);  /* Exit if execve fails */
 	}
@@ -53,5 +55,5 @@ void execute_command(char *command)
 */
 void handle_error(char *command)
 {
-	fprintf(stderr, "Command not found: %s\n", command);
+	fprintf(stderr, "%s: Command not found\n", command);
 }
