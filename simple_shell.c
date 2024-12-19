@@ -1,89 +1,48 @@
 #include "simple_shell.h"
 
 /**
-* execute_command - Executes a given command.
-*
-* @command: The command to execute.
-*
-* This function checks if the command exists in the system, and if it does,
-* it uses `execve` to execute the command. If the command cannot be found,
-* it prints an error message.
-*
-* Return: 0 on success, or -1 on failure.
-*/
-int execute_command(char *command)
-{
-	pid_t pid = fork();  /* Create a child process */
-
-	if (pid == -1)
-	{
-		perror("fork");
-		return (-1);  /* Error in forking the process */
-	}
-
-	if (pid == 0)  /* Child process */
-	{
-		if (execve(command, NULL, NULL) == -1)
-		{
-			perror(command);  /* Print error if command fails */
-			exit(EXIT_FAILURE);  /* Exit the child process on failure */
-		}
-	}
-
-	wait(NULL);  /* Wait for the child process to finish */
-	return (0);  /* Return 0 on successful execution */
-}
-
-/**
-* handle_error - Handles errors and prints an error message.
-*
-* @error_message: The error message to display.
-*
-* This function prints an error message to stderr.
-*
-* Return: Nothing (void).
-*/
-void handle_error(char *error_message)
-{
-	fprintf(stderr, "%s\n", error_message);  /* Print the error message */
-}
-
-/**
-* main - Entry point of the simple shell program.
-*
-* The `main` function displays a prompt, accepts user input, and executes
-* commands entered by the user. The program continues to display the prompt
-* until the user exits (Ctrl+D or "exit").
-*
-* Return: Always 0.
-*/
+ * main - Entry point of the shell program.
+ *
+ * Description: Displays a prompt, reads user input, and executes
+ * commands in a loop until EOF or termination. Supports both
+ * interactive and non-interactive modes.
+ *
+ * Return: Always returns 0.
+ */
 int main(void)
 {
-	char *command = NULL;
+	char *line = NULL; /* Input line */
+	size_t len = 0;    /* Length of the line */
+	ssize_t nread;     /* Number of characters read */
 
-	size_t len = 0;
-
+	/* Loop indefinitely to read and execute commands */
 	while (1)
 	{
-		printf("#cisfun$ ");
-		if (getline(&command, &len, stdin) == -1)
+		/* Display prompt in interactive mode */
+		if (isatty(STDIN_FILENO))
 		{
-			if (feof(stdin))  /* End of file reached (Ctrl+D) */
-			{
-				printf("\n");
-				break;
-			}
-			handle_error("Error reading input");
-			continue;
+			printf("$ ");
+			fflush(stdout);
 		}
 
-		command[strcspn(command, "\n")] = '\0';  /* Remove newline */
-		if (command[0] == '\0')  /* Empty command */
-			continue;
+		/* Read input from the user */
+		nread = getline(&line, &len, stdin);
+		if (nread == -1)
+		{
+			/* Handle EOF (Ctrl+D) */
+			if (isatty(STDIN_FILENO))
+				printf("\n");
+			break; /* Exit the loop */
+		}
 
-		execute_command(command);  /* Execute the command */
+		/* Remove the newline character from the input */
+		line[strcspn(line, "\n")] = '\0';
+
+		/* Execute the command entered by the user */
+		execute_command(line);
 	}
 
-	free(command);  /* Free allocated memory */
-	return (0);  /* Return 0 to indicate successful execution */
+	/* Free the allocated memory for the input line */
+	free(line);
+	return (0);
 }

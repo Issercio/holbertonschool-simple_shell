@@ -1,0 +1,7 @@
+[Thu Dec 19 09:50:14 2024] Commande exécutée: /bin
+[Thu Dec 19 09:50:27 2024] Commande exécutée: ls -l
+[Thu Dec 19 09:51:22 2024] Commande exécutée: exit
+[Thu Dec 19 09:52:22 2024] Commande exécutée: /bin
+[Thu Dec 19 09:52:26 2024] Commande exécutée: ls
+[Thu Dec 19 09:52:31 2024] Commande exécutée: ls -l /bin
+[Thu Dec 19 09:52:34 2024] Commande exécutée: exit

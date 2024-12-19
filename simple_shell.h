@@ -3,22 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/wait.h>
+#include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <dirent.h>
-#include <errno.h>
 
-#define MAX_CMD_LENGTH 1024
-#define MAX_ARGS 100
-
-extern char **environ;
-
-/* Prototypes des fonctions */
-char **parse_args(char *cmd);
-int command_exists(char *cmd);
-void execute_command(char *cmd);
-void print_env(void);
+void log_command(char *command);
+void execute_command(char *command);
 
 #endif /* SIMPLE_SHELL_H */
