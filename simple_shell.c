@@ -1,13 +1,18 @@
 #include "simple_shell.h"
 
 /**
- * execute_ls - Exécute la commande 'ls'
+ * execute_command - Exécute une commande utilisateur
+ * @command: La commande entrée par l'utilisateur
  */
-void execute_ls(void)
+void execute_command(char *command)
 {
 	pid_t pid;
 	int status;
-	char *argv[] = {"/bin/ls", NULL};
+	char *argv[2]; /* Tableau pour la commande et NULL */
+
+	/* Initialisation du tableau dynamiquement */
+	argv[0] = command;
+	argv[1] = NULL;
 
 	pid = fork();
 	if (pid == -1)
@@ -15,37 +20,24 @@ void execute_ls(void)
 		perror("fork");
 		return;
 	}
-	if (pid == 0)
+	if (pid == 0) /* Processus enfant */
 	{
-		if (execve(argv[0], argv, NULL) == -1)
+		if (execve(command, argv, NULL) == -1)
 		{
-			perror("execve");
-			exit(1);
+			perror("./shell");
+			exit(127);
 		}
 	}
-	wait(&status);
-}
-
-/**
- * execute_command - Exécute une commande utilisateur
- * @command: La commande entrée par l'utilisateur
- */
-void execute_command(char *command)
-{
-	if (strcmp(command, "ls") == 0 || strcmp(command, "/bin/ls") == 0)
+	else /* Processus parent */
 	{
-		execute_ls();
-	}
-	else
-	{
-		fprintf(stderr, "%s: command not found\n", command);
+		wait(&status);
 	}
 }
 
 /**
  * main - Fonction principale du shell
  *
- * Return: 0 en cas de succès, ou une erreur
+ * Return: Toujours 0
  */
 int main(void)
 {
@@ -57,25 +49,33 @@ int main(void)
 	{
 		printf("#cisfun$ ");
 		read = getline(&command, &len, stdin);
-		if (read == -1)
+		if (read == -1) /* Gestion de Ctrl+D (EOF) */
 		{
 			free(command);
 			printf("\n");
-			return (0);
+			break;
 		}
+
+		/* Retirer le saut de ligne de la commande */
 		command[read - 1] = '\0';
 
-		if (access(command, X_OK) == 0 || strcmp(command, "ls") == 0)
+		/* Vérification si la commande est vide */
+		if (strlen(command) == 0)
+			continue;
+
+		/* Exécuter la commande */
+		if (access(command, X_OK) == 0)
 		{
 			execute_command(command);
 		}
 		else
 		{
-			fprintf(stderr, "./shell: %s: No such file or directory\n", command);
+			fprintf(stderr, "./shell: %s: command not found\n", command);
 		}
 
 		free(command);
 		command = NULL;
 	}
+
 	return (0);
 }
