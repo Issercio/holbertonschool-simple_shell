@@ -1,55 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "simple_shell.h"
 
 /**
- * execute_ls - Exécute la commande 'ls' ou '/bin/ls'
- * @command: La commande entrée par l'utilisateur
- *
- * Return: 1 si 'ls' ou '/bin/ls' est exécuté, 0 sinon
+ * execute_ls - Exécute la commande 'ls'
  */
-int execute_ls(char *command)
+void execute_ls(void)
 {
 	pid_t pid;
 	int status;
 	char *argv[] = {"/bin/ls", NULL};
 
-	if (strcmp(command, "ls") == 0 || strcmp(command, "/bin/ls") == 0)
+	pid = fork();
+	if (pid == -1)
 	{
-		pid = fork();
-		if (pid == -1)
+		perror("fork");
+		return;
+	}
+	if (pid == 0)
+	{
+		if (execve(argv[0], argv, NULL) == -1)
 		{
-			perror("fork");
-			return (-1);
-		}
-		if (pid == 0)
-		{
-			execve("/bin/ls", argv, NULL);
 			perror("execve");
 			exit(1);
 		}
-		wait(&status);
-		return (1);
 	}
-	return (0);
+	wait(&status);
 }
 
 /**
  * execute_command - Exécute une commande utilisateur
  * @command: La commande entrée par l'utilisateur
- *
- * Return: 0 si la commande a été exécutée correctement, -1 sinon
  */
-int execute_command(char *command)
+void execute_command(char *command)
 {
-	if (execute_ls(command))
-		return (0);
-
-	fprintf(stderr, "%s: command not found\n", command);
-	return (-1);
+	if (strcmp(command, "ls") == 0 || strcmp(command, "/bin/ls") == 0)
+	{
+		execute_ls();
+	}
+	else
+	{
+		fprintf(stderr, "%s: command not found\n", command);
+	}
 }
 
 /**
@@ -75,8 +65,14 @@ int main(void)
 		}
 		command[read - 1] = '\0';
 
-		if (execute_command(command) == -1)
-			perror("Execution error");
+		if (access(command, X_OK) == 0 || strcmp(command, "ls") == 0)
+		{
+			execute_command(command);
+		}
+		else
+		{
+			fprintf(stderr, "./shell: %s: No such file or directory\n", command);
+		}
 
 		free(command);
 		command = NULL;

@@ -3,13 +3,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
-/* Function Declarations */
+/* Prototypes */
 void execute_command(char *command);
-int main(void);
 
 #endif /* SIMPLE_SHELL_H */
