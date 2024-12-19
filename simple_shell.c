@@ -21,30 +21,30 @@ void execute_command(char *command)
 
 	if (command == NULL || strlen(command) == 0)
 	{
-		return;
+		return; /* Ignore empty commands */
 	}
 
 	pid = fork();  /* Create a new child process */
 	if (pid == -1)
 	{
 		perror("Error");
-		return;
+		return;  /* Return if there is an error in forking */
 	}
 
 	if (pid == 0)  /* Child process */
 	{
-		/* Dynamically allocate space for argv and set it */
+		/* Prepare argv for execve */
 		char *argv[2];
 
 		argv[0] = command;
-		argv[1] = NULL;
+		argv[1] = NULL; /* Null-terminate the argument list */
 
 		/* Try to execute the command */
 		if (execve(command, argv, NULL) == -1)
 		{
 			perror("Command not found");
+			exit(EXIT_FAILURE);  /* Exit if command cannot be executed */
 		}
-		exit(EXIT_FAILURE);  /* Exit child process if execve fails */
 	}
 	else  /* Parent process */
 	{
@@ -53,33 +53,39 @@ void execute_command(char *command)
 }
 
 /**
-* main - Entry point of the simple shell program.
+* main - Entry point of the simple shell.
 *
-* Description: This function continuously displays the prompt,
-* waits for user input,
-* and calls `execute_command` to execute the entered command. The shell handles
-* EOF (Ctrl+D) and gracefully exits when EOF is encountered.
+* Description: This function displays a prompt, waits for user input,
+* and executes commands. It loops indefinitely until the user exits or
+* provides EOF (Ctrl+D).
 *
-* Return: Always returns 0 (success).
+* Return: Always returns 0.
 */
 int main(void)
 {
-	char *line = NULL;  /* Input line */
+	char *line = NULL; /* Input line */
 
-	size_t len = 0;     /* Length of the line */
-	ssize_t nread;      /* Number of characters read */
+	size_t len = 0;    /* Length of the line */
+	ssize_t nread;     /* Number of characters read */
 
-	/* Continuously show prompt and execute commands */
+	/* Main loop to handle commands */
 	while (1)
 	{
-		printf("#cisfun$ ");
-		fflush(stdout);  /* Flush output buffer to ensure prompt is displayed */
-
-		nread = getline(&line, &len, stdin);  /* Read input line */
-		if (nread == -1)  /* Handle EOF (Ctrl+D) */
+		/* Display prompt in interactive mode */
+		if (isatty(STDIN_FILENO))
 		{
-			printf("\n");
-			break;  /* Exit the loop on EOF */
+			printf("#cisfun$ ");
+			fflush(stdout);
+		}
+
+		/* Read input from the user */
+		nread = getline(&line, &len, stdin);
+		if (nread == -1)
+		{
+			/* Handle EOF (Ctrl+D) */
+			if (isatty(STDIN_FILENO))
+				printf("\n");
+			break; /* Exit the loop */
 		}
 
 		/* Remove the newline character from the input */
@@ -89,6 +95,7 @@ int main(void)
 		execute_command(line);
 	}
 
-	free(line);  /* Free the memory allocated for the input line */
+	/* Free the allocated memory for the input line */
+	free(line);
 	return (0);
 }
