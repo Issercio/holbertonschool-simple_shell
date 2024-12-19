@@ -1,109 +1,101 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 
 /**
-* execute_exit - Gère la commande exit.
+* execute_exit - Gère la commande 'exit'
+* @command: La commande entrée par l'utilisateur
+*
+* Retour: 1 pour exit ou 0 pour continuer l'exécution
 */
-void execute_exit(void)
+int execute_exit(char *command)
 {
-	exit(0);
-}
-
-/**
-* execute_ls - Exécute la commande ls en utilisant execve.
-*/
-void execute_ls(void)
-{
-	char *argv[2]; /* Déclaration du tableau avant utilisation */
-
-	argv[0] = "/bin/ls";
-	argv[1] = NULL;
-
-	if (execve(argv[0], argv, NULL) == -1)
-	{
-		perror("execve");
-	}
-	exit(EXIT_FAILURE);
-}
-
-/**
-* execute_command - Gère les commandes saisies par l'utilisateur.
-* @command: La commande saisie.
-*/
-void execute_command(char *command)
-{
-	pid_t pid;  /* Déclaration de la variable au début */
-
-	/* Vérifie la commande 'exit' */
 	if (strcmp(command, "exit") == 0)
 	{
-		execute_exit();
+		free(command);
+		exit(0);
 	}
-
-	/* Vérifie la commande 'ls' ou '/bin/ls' */
-	if (strcmp(command, "ls") == 0 || strncmp(command, "/bin/ls", 7) == 0)
-	{
-		execute_ls();
-	}
-
-	/* Exécution de la commande générale */
-	pid = fork(); /* Déclaration de pid avant l'exécution du code */
-	if (pid == -1)
-	{
-		perror("fork");
-		return;
-	}
-
-	if (pid == 0)
-	{
-		char *argv[2]; /* Déclaration avant l'utilisation */
-
-		argv[0] = command;
-		argv[1] = NULL;
-
-		if (execve(command, argv, NULL) == -1)
-		{
-			perror("execve");
-		}
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		wait(NULL); /* Le parent attend que le processus fils se termine */
-	}
+	return (0);
 }
 
 /**
-* main - Boucle principale pour gérer l'entrée utilisateur.
+* execute_ls - Exécute la commande 'ls' ou '/bin/ls'
+* @command: La commande entrée par l'utilisateur
 *
-* Return: Toujours 0.
+* Retour: 1 si 'ls' ou '/bin/ls' est exécuté, 0 sinon
+*/
+int execute_ls(char *command)
+{
+	pid_t pid;
+	int status;
+
+	char *argv[] = {"/bin/ls", NULL};
+
+	if (strcmp(command, "ls") == 0 || strcmp(command, "/bin/ls") == 0)
+	{
+		pid = fork();
+		if (pid == -1)
+			return (-1);
+		else if (pid == 0)
+		{
+			execve("/bin/ls", argv, NULL);
+			perror("execve");
+			exit(1);
+		}
+		wait(&status);
+		return (1);
+	}
+	return (0);
+}
+
+/**
+* execute_command - Exécute une commande
+* @command: La commande entrée par l'utilisateur
+*
+* Retour: 0 si la commande a été exécutée correctement, -1 sinon
+*/
+int execute_command(char *command)
+{
+	if (execute_exit(command))
+		return (0);
+
+	if (execute_ls(command))
+		return (0);
+
+	fprintf(stderr, "%s: command not found\n", command);
+	return (-1);
+}
+
+/**
+* main - Fonction principale du shell
+*
+* Retour: 0
 */
 int main(void)
 {
-	char *line = NULL;
+	char *command = NULL;
 
 	size_t len = 0;
-	ssize_t nread;
+	ssize_t read;
 
 	while (1)
 	{
 		printf("#cisfun$ ");
-		nread = getline(&line, &len, stdin);
-
-		if (nread == -1)
+		read = getline(&command, &len, stdin);
+		if (read == -1)
 		{
+			free(command);
 			printf("\n");
-			free(line);
 			exit(0);
 		}
+		command[read - 1] = '\0';
 
-		line[strcspn(line, "\n")] = 0; /* Supprime le caractère de nouvelle ligne */
-		execute_command(line);
+		if (execute_command(command) == -1)
+			perror("Execution error");
 	}
-
-	free(line);
+	free(command);
 	return (0);
 }
