@@ -5,60 +5,53 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-extern char **environ;
-
 /**
-* execute_command - Exécute une commande donnée.
-* @command: La commande à exécuter.
-*
-* Description: Cette fonction crée un
-* processus fils pour exécuter la commande
-* en utilisant execve. Avant d'exécuter la commande,
-* elle enregistre la commande
-* dans un fichier journal.
+* execute_command - Executes a command in a new process.
+* @command: The command to execute.
 */
 void execute_command(char *command)
 {
-	pid_t pid;    /* Identifiant du processus pour le fork */
-	int status;    /* Statut du processus fils */
+	pid_t pid;
+	int status;
 
-	/* Si la commande est vide, retourner à l'invite */
 	if (command == NULL || strlen(command) == 0)
 	{
 		return;
 	}
 
-	/* Enregistrer la commande dans le fichier journal */
-	log_command(command);
-
-	/* Fork pour créer un processus fils */
-	pid = fork();
+	pid = fork();  /* Create a child process */
 	if (pid == -1)
 	{
-		perror("Erreur");
+		perror("Error forking");
 		return;
 	}
 
-	if (pid == 0)
+	if (pid == 0)  /* Child process */
 	{
-		/* Processus fils */
-		char *argv[2];  /* Tableau d'arguments pour execve */
+		char *argv[2];
 
 		argv[0] = command;
-		argv[1] = NULL; /* Tableau d'arguments null-terminé */
+		argv[1] = NULL;  /* No arguments */
 
-		/* Exécuter la commande */
-		if (execve(command, argv, environ) == -1)
+		if (execve(command, argv, NULL) == -1)  /* Execute the command */
 		{
-			perror("Commande introuvable");
+			handle_error(command);  /* Handle errors */
 		}
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);  /* Exit if execve fails */
 	}
-	else
+	else  /* Parent process */
 	{
-		/* Processus parent, attend la fin du processus fils */
 		do {
-			waitpid(pid, &status, WUNTRACED);
+			waitpid(pid, &status, WUNTRACED);  /* Wait for the child process */
 		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 	}
+}
+
+/**
+* handle_error - Handles error when command is not found.
+* @command: The command that failed.
+*/
+void handle_error(char *command)
+{
+	fprintf(stderr, "Command not found: %s\n", command);
 }
