@@ -95,7 +95,10 @@ int main(void)
 
 		if (execute_command(command) == -1)
 			perror("Execution error");
+
+		free(command);
+		command = NULL;
 	}
-	free(command);
+
 	return (0);
 }
