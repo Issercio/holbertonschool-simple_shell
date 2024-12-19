@@ -2,100 +2,108 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 /**
-* execute_command - Executes a command in a child process.
-* @command: The command to execute.
-*
-* Description: This function creates a child process using `fork()`. If the
-* command is valid, it attempts to execute it using `execve()`. If execution
-* fails (e.g., command not found), it prints an error message.
-* The function waits for the child process to complete in the parent process.
+* execute_exit - Gère la commande exit.
+*/
+void execute_exit(void)
+{
+	exit(0);
+}
+
+/**
+* execute_ls - Exécute la commande ls en utilisant execve.
+*/
+void execute_ls(void)
+{
+	char *argv[2]; /* Déclaration du tableau avant utilisation */
+
+	argv[0] = "/bin/ls";
+	argv[1] = NULL;
+
+	if (execve(argv[0], argv, NULL) == -1)
+	{
+		perror("execve");
+	}
+	exit(EXIT_FAILURE);
+}
+
+/**
+* execute_command - Gère les commandes saisies par l'utilisateur.
+* @command: La commande saisie.
 */
 void execute_command(char *command)
 {
-	pid_t pid;
-	int status;
+	pid_t pid;  /* Déclaration de la variable au début */
 
-	if (command == NULL || strlen(command) == 0)
+	/* Vérifie la commande 'exit' */
+	if (strcmp(command, "exit") == 0)
 	{
-		return; /* Ignore empty commands */
+		execute_exit();
 	}
 
-	pid = fork();  /* Create a new child process */
+	/* Vérifie la commande 'ls' ou '/bin/ls' */
+	if (strcmp(command, "ls") == 0 || strncmp(command, "/bin/ls", 7) == 0)
+	{
+		execute_ls();
+	}
+
+	/* Exécution de la commande générale */
+	pid = fork(); /* Déclaration de pid avant l'exécution du code */
 	if (pid == -1)
 	{
-		perror("Error");
-		return;  /* Return if there is an error in forking */
+		perror("fork");
+		return;
 	}
 
-	if (pid == 0)  /* Child process */
+	if (pid == 0)
 	{
-		/* Prepare argv for execve */
-		char *argv[2];
+		char *argv[2]; /* Déclaration avant l'utilisation */
 
 		argv[0] = command;
-		argv[1] = NULL; /* Null-terminate the argument list */
+		argv[1] = NULL;
 
-		/* Try to execute the command */
 		if (execve(command, argv, NULL) == -1)
 		{
-			perror("Command not found");
-			exit(EXIT_FAILURE);  /* Exit if command cannot be executed */
+			perror("execve");
 		}
+		exit(EXIT_FAILURE);
 	}
-	else  /* Parent process */
+	else
 	{
-		waitpid(pid, &status, WUNTRACED);  /* Wait for the child process to finish */
+		wait(NULL); /* Le parent attend que le processus fils se termine */
 	}
 }
 
 /**
-* main - Entry point of the simple shell.
+* main - Boucle principale pour gérer l'entrée utilisateur.
 *
-* Description: This function displays a prompt, waits for user input,
-* and executes commands. It loops indefinitely until the user exits or
-* provides EOF (Ctrl+D).
-*
-* Return: Always returns 0.
+* Return: Toujours 0.
 */
 int main(void)
 {
-	char *line = NULL; /* Input line */
+	char *line = NULL;
 
-	size_t len = 0;    /* Length of the line */
-	ssize_t nread;     /* Number of characters read */
+	size_t len = 0;
+	ssize_t nread;
 
-	/* Main loop to handle commands */
 	while (1)
 	{
-		/* Display prompt in interactive mode */
-		if (isatty(STDIN_FILENO))
-		{
-			printf("#cisfun$ ");
-			fflush(stdout);
-		}
-
-		/* Read input from the user */
+		printf("#cisfun$ ");
 		nread = getline(&line, &len, stdin);
+
 		if (nread == -1)
 		{
-			/* Handle EOF (Ctrl+D) */
-			if (isatty(STDIN_FILENO))
-				printf("\n");
-			break; /* Exit the loop */
+			printf("\n");
+			free(line);
+			exit(0);
 		}
 
-		/* Remove the newline character from the input */
-		line[strcspn(line, "\n")] = '\0';
-
-		/* Execute the command entered by the user */
+		line[strcspn(line, "\n")] = 0; /* Supprime le caractère de nouvelle ligne */
 		execute_command(line);
 	}
 
-	/* Free the allocated memory for the input line */
 	free(line);
 	return (0);
 }
