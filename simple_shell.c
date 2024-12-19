@@ -6,39 +6,25 @@
 #include <sys/wait.h>
 
 /**
-* execute_exit - Gère la commande 'exit'
-* @command: La commande entrée par l'utilisateur
-*
-* Retour: 1 pour exit ou 0 pour continuer l'exécution
-*/
-int execute_exit(char *command)
-{
-	if (strcmp(command, "exit") == 0)
-	{
-		free(command);
-		exit(0);
-	}
-	return (0);
-}
-
-/**
-* execute_ls - Exécute la commande 'ls' ou '/bin/ls'
-* @command: La commande entrée par l'utilisateur
-*
-* Retour: 1 si 'ls' ou '/bin/ls' est exécuté, 0 sinon
-*/
+ * execute_ls - Exécute la commande 'ls' ou '/bin/ls'
+ * @command: La commande entrée par l'utilisateur
+ *
+ * Return: 1 si 'ls' ou '/bin/ls' est exécuté, 0 sinon
+ */
 int execute_ls(char *command)
 {
 	pid_t pid;
 	int status;
-
 	char *argv[] = {"/bin/ls", NULL};
 
 	if (strcmp(command, "ls") == 0 || strcmp(command, "/bin/ls") == 0)
 	{
 		pid = fork();
 		if (pid == -1)
+		{
+			perror("fork");
 			return (-1);
+		}
 		if (pid == 0)
 		{
 			execve("/bin/ls", argv, NULL);
@@ -52,16 +38,13 @@ int execute_ls(char *command)
 }
 
 /**
-* execute_command - Exécute une commande
-* @command: La commande entrée par l'utilisateur
-*
-* Retour: 0 si la commande a été exécutée correctement, -1 sinon
-*/
+ * execute_command - Exécute une commande utilisateur
+ * @command: La commande entrée par l'utilisateur
+ *
+ * Return: 0 si la commande a été exécutée correctement, -1 sinon
+ */
 int execute_command(char *command)
 {
-	if (execute_exit(command))
-		return (0);
-
 	if (execute_ls(command))
 		return (0);
 
@@ -70,14 +53,13 @@ int execute_command(char *command)
 }
 
 /**
-* main - Fonction principale du shell
-*
-* Retour: 0
-*/
+ * main - Fonction principale du shell
+ *
+ * Return: 0 en cas de succès, ou une erreur
+ */
 int main(void)
 {
 	char *command = NULL;
-
 	size_t len = 0;
 	ssize_t read;
 
@@ -85,14 +67,12 @@ int main(void)
 	{
 		printf("#cisfun$ ");
 		read = getline(&command, &len, stdin);
-
 		if (read == -1)
 		{
 			free(command);
 			printf("\n");
-			exit(0);
+			return (0);
 		}
-
 		command[read - 1] = '\0';
 
 		if (execute_command(command) == -1)
@@ -101,6 +81,5 @@ int main(void)
 		free(command);
 		command = NULL;
 	}
-
 	return (0);
 }
