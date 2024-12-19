@@ -39,7 +39,7 @@ int execute_ls(char *command)
 		pid = fork();
 		if (pid == -1)
 			return (-1);
-		else if (pid == 0)
+		if (pid == 0)
 		{
 			execve("/bin/ls", argv, NULL);
 			perror("execve");
@@ -85,12 +85,14 @@ int main(void)
 	{
 		printf("#cisfun$ ");
 		read = getline(&command, &len, stdin);
+
 		if (read == -1)
 		{
 			free(command);
 			printf("\n");
 			exit(0);
 		}
+
 		command[read - 1] = '\0';
 
 		if (execute_command(command) == -1)
