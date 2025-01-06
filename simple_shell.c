@@ -1,16 +1,16 @@
 #include "simple_shell.h"
 
 /**
- * execute_command - Exécute une commande utilisateur
- * @command: La commande entrée par l'utilisateur
+ * execute_command - Executes a user command.
+ * @command: The command entered by the user.
  */
 void execute_command(char *command)
 {
 	pid_t pid;
 	int status;
-	char *argv[2]; /* Tableau pour la commande et NULL */
+	char *argv[2]; /* Array for the command and NULL */
 
-	/* Initialisation du tableau dynamiquement */
+	/* Initialize the array dynamically */
 	argv[0] = command;
 	argv[1] = NULL;
 
@@ -20,24 +20,24 @@ void execute_command(char *command)
 		perror("fork");
 		return;
 	}
-	if (pid == 0) /* Processus enfant */
+	if (pid == 0) /* Child process */
 	{
 		if (execve(command, argv, NULL) == -1)
 		{
 			perror("./shell");
-			exit(127);
+			exit(127); /* Exit with error code 127 */
 		}
 	}
-	else /* Processus parent */
+	else /* Parent process */
 	{
 		wait(&status);
 	}
 }
 
 /**
- * main - Fonction principale du shell
+ * main - Main shell function.
  *
- * Return: Toujours 0
+ * Return: Always 0
  */
 int main(void)
 {
@@ -47,23 +47,26 @@ int main(void)
 
 	while (1)
 	{
+		/* Display the prompt */
 		printf("#cisfun$ ");
 		read = getline(&command, &len, stdin);
-		if (read == -1) /* Gestion de Ctrl+D (EOF) */
+
+		/* Handle Ctrl+D (EOF) */
+		if (read == -1)
 		{
 			free(command);
 			printf("\n");
 			break;
 		}
 
-		/* Retirer le saut de ligne de la commande */
+		/* Remove the trailing newline character */
 		command[read - 1] = '\0';
 
-		/* Vérification si la commande est vide */
+		/* Check if command is empty */
 		if (strlen(command) == 0)
 			continue;
 
-		/* Exécuter la commande */
+		/* Execute the command if accessible */
 		if (access(command, X_OK) == 0)
 		{
 			execute_command(command);
@@ -73,6 +76,7 @@ int main(void)
 			fprintf(stderr, "./shell: %s: command not found\n", command);
 		}
 
+		/* Free command for the next iteration */
 		free(command);
 		command = NULL;
 	}
