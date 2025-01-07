@@ -3,12 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string.h>
 
-/* Prototypes */
+/* Function Prototypes */
 void execute_command(char *command);
+int handle_input(char **command, size_t *len);
 
 #endif /* SIMPLE_SHELL_H */
