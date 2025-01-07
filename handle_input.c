@@ -4,11 +4,10 @@
  * handle_input - Lit l'entrée de l'utilisateur, traite les commandes et les exécute.
  * @command: Un pointeur vers une chaîne pour stocker la commande de l'utilisateur.
  * @len: Un pointeur vers la taille du tampon pour stocker l'entrée de l'utilisateur.
- * @envp: Un pointeur vers les variables d'environnement.
  *
  * Return: 0 si le shell doit quitter, 1 si le shell doit continuer.
  */
-int handle_input(char **command, size_t *len, char **envp)
+int handle_input(char **command, size_t *len)
 {
     ssize_t read;
 
@@ -21,7 +20,7 @@ int handle_input(char **command, size_t *len, char **envp)
 
     /* Lire l'entrée de l'utilisateur */
     read = getline(command, len, stdin);
-    if (read == -1)  /* Gérer la condition EOF (Ctrl+D) */
+    if (read == -1) /* Gérer la condition EOF (Ctrl+D) */
     {
         if (isatty(STDIN_FILENO))
         {
@@ -49,7 +48,7 @@ int handle_input(char **command, size_t *len, char **envp)
     }
 
     /* Exécuter la commande */
-    execute_command(*command, envp);
+    execute_command(*command);
 
     return (1); /* Continuer le shell */
 }
