@@ -8,36 +8,36 @@
 #include <string.h>
 
 /**
- * find_command_in_path - Searches for a command in directories listed in PATH.
- * @command: The command to search for.
- * @envp: The environment variables (currently unused).
+ * find_command_in_path - Recherche une commande dans les répertoires listés dans PATH.
+ * @command: La commande à rechercher.
+ * @envp: Les variables d'environnement (non utilisées ici).
  *
- * Description: This function splits the PATH environment variable into individual
- * directories and checks each one for the given command. If found, the full
- * path to the command is returned. If not found, NULL is returned.
+ * Description: Cette fonction découpe la variable PATH en répertoires individuels et
+ * vérifie chaque répertoire pour la commande donnée. Si trouvée, le chemin complet vers
+ * la commande est retourné. Sinon, NULL est retourné.
  *
- * Return: Full path of the command if found, NULL if not found.
+ * Return: Le chemin complet de la commande si trouvé, NULL sinon.
  */
 char *find_command_in_path(char *command, char **envp)
 {
     char *path_env, *path = NULL, *full_path = NULL;
 
-    (void)envp; /* Suppress unused parameter warning */
+    (void)envp; /* Supprime l'avertissement sur le paramètre inutilisé */
 
-    /* Get PATH from the environment */
+    /* Récupère le PATH depuis les variables d'environnement */
     path_env = getenv("PATH");
 
-    /* If PATH is not set, return NULL */
+    /* Si PATH n'est pas défini, retourne NULL */
     if (path_env == NULL)
     {
         return (NULL);
     }
 
-    /* Split the PATH into directories using strtok() */
+    /* Découpe le PATH en répertoires avec strtok() */
     path = strtok(path_env, ":");
     while (path != NULL)
     {
-        /* Allocate memory for full command path */
+        /* Alloue de la mémoire pour le chemin complet */
         full_path = malloc(strlen(path) + strlen(command) + 2);
         if (full_path == NULL)
         {
@@ -45,36 +45,36 @@ char *find_command_in_path(char *command, char **envp)
             return (NULL);
         }
 
-        /* Build the full path by appending command to directory */
+        /* Construit le chemin complet en ajoutant la commande au répertoire */
         strcpy(full_path, path);
         strcat(full_path, "/");
         strcat(full_path, command);
 
-        /* Check if command is executable */
+        /* Vérifie si la commande est exécutable */
         if (access(full_path, X_OK) == 0)
         {
-            return (full_path); /* Return the full path if executable */
+            return (full_path); /* Retourne le chemin complet si exécutable */
         }
 
-        /* Free allocated memory and check the next directory in PATH */
+        /* Libère la mémoire allouée et vérifie le répertoire suivant dans PATH */
         free(full_path);
         path = strtok(NULL, ":");
     }
 
-    return (NULL); /* Command not found in any directory */
+    return (NULL); /* Commande non trouvée dans aucun répertoire */
 }
 
 /**
- * execute_command - Executes the given command using execve().
- * @command: The command to execute.
- * @envp: The environment variables.
+ * execute_command - Exécute la commande donnée avec execve().
+ * @command: La commande à exécuter.
+ * @envp: Les variables d'environnement.
  *
- * Description: This function creates a child process using fork(). In the child
- * process, it executes the command using execve(). If execve() fails, an error 
- * message is printed, and the child process exits with status 127. The parent process
- * waits for the child process to terminate.
+ * Description: Cette fonction crée un processus fils avec fork(). Dans le processus
+ * fils, la commande est exécutée avec execve(). Si execve() échoue, un message d'erreur
+ * est affiché, et le processus fils se termine avec le code d'erreur 127. Le processus
+ * parent attend que le processus fils se termine.
  *
- * Return: None.
+ * Return: Aucun.
  */
 void execute_command(char *command, char **envp)
 {
@@ -82,11 +82,11 @@ void execute_command(char *command, char **envp)
     int status;
     char *argv[2];
 
-    /* Set up argument vector for execve */
+    /* Prépare le vecteur d'arguments pour execve */
     argv[0] = command;
     argv[1] = NULL;
 
-    /* Create a new child process using fork */
+    /* Crée un nouveau processus fils avec fork */
     pid = fork();
     if (pid == -1)
     {
@@ -94,105 +94,105 @@ void execute_command(char *command, char **envp)
         return;
     }
 
-    if (pid == 0) /* Child process */
+    if (pid == 0) /* Processus fils */
     {
         char *path_command = command;
 
-        /* If the command is not an absolute or relative path, search in PATH */
+        /* Si la commande n'est pas un chemin absolu ou relatif, chercher dans PATH */
         if (command[0] != '/' && command[0] != '.')
         {
             path_command = find_command_in_path(command, envp);
             if (path_command == NULL)
             {
-                perror(command); /* Command not found */
-                exit(127); /* Exit child process with error code */
+                fprintf(stderr, "%s: command not found\n", command); /* Commande non trouvée */
+                exit(127); /* Quitter le processus fils avec le code d'erreur */
             }
         }
 
-        /* Execute the command */
+        /* Exécuter la commande */
         if (execve(path_command, argv, envp) == -1)
         {
-            perror(command); /* If execve fails */
-            exit(127); /* Exit child process with error code */
+            perror(command); /* Si execve échoue */
+            exit(127); /* Quitter le processus fils avec le code d'erreur */
         }
     }
-    else /* Parent process */
+    else /* Processus parent */
     {
-        wait(&status); /* Wait for the child process to terminate */
+        wait(&status); /* Attendre que le processus fils se termine */
     }
 }
 
 /**
- * handle_input - Handles user input, executes commands, and returns whether to continue.
- * @command: Pointer to the command buffer.
- * @len: Pointer to the length of the command buffer.
- * @envp: The environment variables.
+ * handle_input - Gère l'entrée de l'utilisateur, exécute les commandes et retourne si on continue.
+ * @command: Pointeur vers le buffer de commande.
+ * @len: Pointeur vers la longueur du buffer de commande.
+ * @envp: Les variables d'environnement.
  *
- * Description: This function displays a prompt if running interactively, reads
- * user input, checks if the command is valid, and executes it. If the input is
- * empty, it does nothing. It returns 1 to continue the shell or 0 to exit.
+ * Description: Cette fonction affiche un prompt si on est en mode interactif, lit
+ * l'entrée de l'utilisateur, vérifie si la commande est valide et l'exécute. Si l'entrée
+ * est vide, elle ne fait rien. Elle retourne 1 pour continuer le shell ou 0 pour sortir.
  *
- * Return: 1 to continue the shell, 0 to exit.
+ * Return: 1 pour continuer le shell, 0 pour quitter.
  */
 int handle_input(char **command, size_t *len, char **envp)
 {
     ssize_t read;
 
-    /* Display prompt if in interactive mode */
+    /* Afficher le prompt si on est en mode interactif */
     if (isatty(STDIN_FILENO))
     {
         printf("#cisfun$ ");
     }
     fflush(stdout);
 
-    /* Read the user input */
+    /* Lire l'entrée de l'utilisateur */
     read = getline(command, len, stdin);
-    if (read == -1) /* Handle EOF (Ctrl+D) */
+    if (read == -1) /* Gérer l'EOF (Ctrl+D) */
     {
         if (isatty(STDIN_FILENO))
         {
             printf("\n");
         }
-        return (0); /* Exit the shell */
+        return (0); /* Quitter le shell */
     }
 
-    /* Remove newline character at the end of the command */
+    /* Supprimer le caractère de nouvelle ligne à la fin de la commande */
     if ((*command)[read - 1] == '\n')
     {
         (*command)[read - 1] = '\0';
     }
 
-    /* If the input is empty, return 1 to continue */
+    /* Si l'entrée est vide, retourner 1 pour continuer */
     if ((*command)[0] == '\0')
     {
         return (1);
     }
 
-    /* Check if the command is executable and execute it */
+    /* Vérifier si la commande est exécutable et l'exécuter */
     if (access(*command, X_OK) == 0)
     {
         execute_command(*command, envp);
     }
     else
     {
-        /* Check if the command is found in PATH and execute */
+        /* Vérifier si la commande est trouvée dans PATH et l'exécuter */
         execute_command(*command, envp);
     }
 
-    return (1); /* Continue the shell */
+    return (1); /* Continuer le shell */
 }
 
 /**
- * main - Entry point for the shell program.
- * @argc: The number of arguments passed to the shell (currently unused).
- * @argv: The arguments passed to the shell (currently unused).
- * @envp: The environment variables.
+ * main - Point d'entrée du programme shell.
+ * @argc: Le nombre d'arguments passés au shell (non utilisés ici).
+ * @argv: Les arguments passés au shell (non utilisés ici).
+ * @envp: Les variables d'environnement.
  *
- * Description: This function runs the shell. It repeatedly calls handle_input()
- * to read commands and execute them. It exits when the user types `exit` or
- * presses `Ctrl+D` (EOF).
+ * Description: Cette fonction exécute le shell. Elle appelle continuellement handle_input()
+ * pour lire et exécuter les commandes. Elle quitte lorsque l'utilisateur tape `exit` ou
+ * appuie sur `Ctrl+D` (EOF).
  *
- * Return: 0 on successful exit of the shell.
+ * Return: 0 lors de la sortie du shell avec succès.
  */
 int main(int argc, char **argv, char **envp)
 {
@@ -200,16 +200,16 @@ int main(int argc, char **argv, char **envp)
     size_t len = 0;
     int running = 1;
 
-    (void)argc; /* Suppress unused parameter warning */
-    (void)argv; /* Suppress unused parameter warning */
+    (void)argc; /* Supprime l'avertissement sur le paramètre inutilisé */
+    (void)argv; /* Supprime l'avertissement sur le paramètre inutilisé */
 
-    /* Continuously handle input until the user exits */
+    /* Boucle infinie pour gérer l'entrée de l'utilisateur */
     while (running)
     {
-        running = handle_input(&command, &len, envp); /* Process user input */
+        running = handle_input(&command, &len, envp); /* Traiter l'entrée de l'utilisateur */
     }
 
-    /* Free memory allocated for the command before exiting */
+    /* Libérer la mémoire allouée pour la commande avant de quitter */
     free(command);
     return (0);
 }
