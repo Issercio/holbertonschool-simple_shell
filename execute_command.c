@@ -7,7 +7,20 @@
 void execute_command(char *command)
 {
 	pid_t pid;
-	char *argv[2]; /* Tableau d'arguments pour execve */
+	char *argv[64];  /* Tableau d'arguments pour execve */
+
+	char *token;
+
+	int i = 0;
+
+	/* Tokenize the command string to separate arguments */
+	token = strtok(command, " ");
+	while (token != NULL && i < 63)
+	{
+		argv[i++] = token;
+		token = strtok(NULL, " ");
+	}
+	argv[i] = NULL;  /* Null-terminate the argument list */
 
 	pid = fork(); /* Créer un processus enfant */
 
@@ -17,20 +30,15 @@ void execute_command(char *command)
 		return;
 	}
 
-	if (pid == 0) /* Dans le processus enfant */
+	if (pid == 0)
 	{
-		/* Préparer argv pour execve */
-		argv[0] = command; /* La commande complète (chemin absolu ou relatif) */
-		argv[1] = NULL;    /* Aucun autre argument à passer */
-
-		/* Exécuter la commande */
-		if (execve(command, argv, environ) == -1)
+		if (execve(argv[0], argv, environ) == -1)
 		{
-			fprintf(stderr, "Command not found or failed: %s\n", command);
+			fprintf(stderr, "Command not found or failed: %s\n", argv[0]);
 			exit(127); /* Code de retour standard pour commande introuvable ou erreur */
 		}
 	}
-	else /* Dans le processus parent */
+	else
 	{
 		wait(NULL); /* Attendre que le processus enfant se termine */
 	}

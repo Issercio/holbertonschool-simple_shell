@@ -11,14 +11,9 @@
 /* Accès global aux variables d'environnement */
 extern char **environ;
 
-/* Fonction pour afficher les erreurs */
+/* Déclarations des fonctions */
 void handle_error(const char *error_message);
-
-/* Fonction pour exécuter la commande */
 void execute_command(char *command);
-
-/* Fonction pour gérer l'entrée de l'utilisateur */
 int handle_input(char **command, size_t *len);
-
 
 #endif /* SIMPLE_SHELL_H */
