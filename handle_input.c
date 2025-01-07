@@ -1,55 +1,55 @@
 #include "simple_shell.h"
 
 /**
- * handle_input - Reads user input, processes commands, and executes them.
- * @command: A pointer to a string that will hold the user's input.
- * @len: A pointer to the size of the buffer for storing user input.
- * @envp: A pointer to the environment variables.
+ * handle_input - Lit l'entrée de l'utilisateur, traite les commandes et les exécute.
+ * @command: Un pointeur vers une chaîne pour stocker la commande de l'utilisateur.
+ * @len: Un pointeur vers la taille du tampon pour stocker l'entrée de l'utilisateur.
+ * @envp: Un pointeur vers les variables d'environnement.
  *
- * Return: 0 if the shell should exit, 1 if the shell should continue running.
+ * Return: 0 si le shell doit quitter, 1 si le shell doit continuer.
  */
 int handle_input(char **command, size_t *len, char **envp)
 {
     ssize_t read;
 
-    /* Display prompt if in interactive mode */
+    /* Afficher le prompt si nous sommes en mode interactif */
     if (isatty(STDIN_FILENO))
     {
         printf("#cisfun$ ");
     }
     fflush(stdout);
 
-    /* Read the user input */
+    /* Lire l'entrée de l'utilisateur */
     read = getline(command, len, stdin);
-    if (read == -1)  /* Handle EOF (Ctrl+D) */
+    if (read == -1)  /* Gérer la condition EOF (Ctrl+D) */
     {
         if (isatty(STDIN_FILENO))
         {
             printf("\n");
         }
-        return (0); /* Exit the shell */
+        return (0); /* Quitter le shell */
     }
 
-    /* Remove newline character at the end of the command */
+    /* Supprimer le caractère de nouvelle ligne à la fin de la commande */
     if ((*command)[read - 1] == '\n')
     {
         (*command)[read - 1] = '\0';
     }
 
-    /* If the input is empty, return 1 to continue */
+    /* Si la commande est vide, retourner 1 pour continuer */
     if ((*command)[0] == '\0')
     {
         return (1);
     }
 
-    /* If the command is "exit", terminate the shell */
+    /* Si la commande est "exit", terminer le shell */
     if (strcmp(*command, "exit") == 0)
     {
-        return (0); /* Exit the shell */
+        return (0); /* Quitter le shell */
     }
 
-    /* Execute the command */
+    /* Exécuter la commande */
     execute_command(*command, envp);
 
-    return (1); /* Continue the shell */
+    return (1); /* Continuer le shell */
 }

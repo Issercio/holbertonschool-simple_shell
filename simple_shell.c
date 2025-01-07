@@ -1,35 +1,35 @@
 #include "simple_shell.h"
 
 /**
- * main - Entry point for the shell program.
- * @argc: The number of arguments passed to the shell (currently unused).
- * @argv: The arguments passed to the shell (currently unused).
- * @envp: The environment variables.
- *
- * Description: This function runs the shell. It repeatedly calls the function
- * handle_input() to read commands and execute them. It exits when the user
- * types `exit` or presses `Ctrl+D` (EOF).
- *
- * Return: 0 on successful exit of the shell.
- */
-
+* main - Point d'entrée pour le programme shell.
+* @argc: Le nombre d'arguments passés au shell (non utilisé ici).
+* @argv: Les arguments passés au shell (non utilisés ici).
+* @envp: Les variables d'environnement.
+*
+* Description: Cette fonction fait tourner le shell en boucle. Elle appelle
+* handle_input() pour lire et exécuter des commandes. Le shell se termine
+* lorsque l'utilisateur entre "exit" ou appuie sur Ctrl+D (EOF).
+*
+* Return: 0 si le shell se termine avec succès.
+*/
 int main(int argc, char **argv, char **envp)
 {
 	char *command = NULL;
+
 	size_t len = 0;
 	int running = 1;
 
-	/* Suppress unused parameter warnings for argc and argv */
+	/* Supprimer les avertissements sur les paramètres non utilisés */
 	(void)argc;
 	(void)argv;
 
-	/* Continuously handle input until the user exits */
+	/* Continuer à traiter les entrées tant que l'utilisateur ne quitte pas */
 	while (running)
 	{
-		running = handle_input(&command, &len, envp); /* Process user input */
+		running = handle_input(&command, &len, envp);
 	}
 
-	/* Free memory allocated for the command before exiting */
+	/* Libérer la mémoire allouée pour la commande avant de quitter */
 	free(command);
 
 	return (0);
