@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <string.h>
+#include "simple_shell.h"
 
 /**
  * execute_command - Executes the given command using execve().
@@ -36,13 +32,6 @@ void execute_command(char *command, char **envp)
 
     if (pid == 0) /* Child process */
     {
-        /* If it's not an absolute or relative path, it's invalid */
-        if (command[0] != '/' && command[0] != '.')
-        {
-            fprintf(stderr, "%s: command not found\n", command); /* Command not found */
-            exit(127); /* Exit child process with error code */
-        }
-
         /* Execute the command */
         if (execve(command, argv, envp) == -1)
         {
