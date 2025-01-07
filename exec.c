@@ -41,6 +41,7 @@ void handle_process(char **args) {
 		   }
             exit(1);
         }
+		free(path);
     } else {
         /* Parent*/
         wait(NULL);
