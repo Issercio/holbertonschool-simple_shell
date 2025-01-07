@@ -1,33 +1,48 @@
 #include "main.h"
 #include <sys/wait.h>
 #include <errno.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-/* Fonction pour exécuter des commandes externes */
+/*void handle_process(char *command, char **args)     printf("Exécution de la commande : %s\n", command);*/
+
+/* Fonction pour exécuter des commandes externes*/
 void handle_process(char **args) {
-    pid_t pid = fork();  // Crée un nouveau processus
 
+    pid_t pid = fork();
+
+ 
     if (pid == -1) {
-        // En cas d'erreur avec fork()
         perror("fork failed");
         return;
     }
 
     if (pid == 0) {
-        // Processus enfant
-        if (execve(args[0], args, environ) == -1) {  // Essaie d'exécuter la commande
-            // Si execve échoue, on affiche l'erreur
-            if (errno == ENOENT) {
-                fprintf(stderr, "Error: '%s' command not found\n", args[0]);
-            } else {
-                perror("execve failed");
+        /* Enfant*/
+       char *path = args[0];
+        
+        if (args[0][0] != '/' && args[0][0] != '.') {
+            /* Tenter d'ajouter un './' au début si aucun '/' n'est fourni*/
+            char *command_with_path = malloc(strlen("./") + strlen(path) + 1);  /* pour './' + nom de la commande + '\0'*/
+            if (command_with_path == NULL) {
+                perror("malloc failed");
+                exit(1);
             }
-            exit(1);  // Quitte le processus enfant en cas d'échec
+            strcpy(command_with_path, "./");
+            strcat(command_with_path, path);
+            path = command_with_path;
+        }
+
+        /* Exécuter la commande via execve avec le chemin absolu*/
+        if (execve(path, args, environ) == -1)
+		{
+           if (errno == ENOENT) 
+		  
+		   {			
+			perror("./shell");
+		   }
+            exit(1);
         }
     } else {
-        // Processus parent
-        wait(NULL);  // Attends que l'enfant ait fini son exécution
+        /* Parent*/
+        wait(NULL);
     }
 }
