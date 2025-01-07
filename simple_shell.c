@@ -75,7 +75,7 @@ int handle_input(char **command, size_t *len)
 	else
 	{
 		/* Print error if the command is not found or not executable */
-		fprintf(stderr, "%s: command not found\n", *command);
+		fprintf(stderr, "./hsh: %s: command not found\n", *command);
 	}
 
 	return (1);
