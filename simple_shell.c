@@ -1,4 +1,8 @@
-#include "simple_shell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
 
 /**
  * execute_command - Executes the given command using execve().
@@ -18,9 +22,11 @@ void execute_command(char *command, char **envp)
     int status;
     char *argv[2];
 
+    /* Set up argument vector for execve */
     argv[0] = command;
     argv[1] = NULL;
 
+    /* Create a new child process using fork */
     pid = fork();
     if (pid == -1)
     {
@@ -30,11 +36,11 @@ void execute_command(char *command, char **envp)
 
     if (pid == 0) /* Child process */
     {
-        printf("Child process: executing command '%s'\n", command);
+        /* Execute the command */
         if (execve(command, argv, envp) == -1)
         {
-            perror(command);
-            exit(127);
+            perror(command); /* If execve fails */
+            exit(127); /* Exit child process with error code */
         }
     }
     else /* Parent process */
