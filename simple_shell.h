@@ -1,15 +1,17 @@
 #ifndef SIMPLE_SHELL_H
 #define SIMPLE_SHELL_H
 
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <string.h>
+#include <stddef.h>
 
-/* Function Prototypes */
-void execute_command(char *command);
-int handle_input(char **command, size_t *len);
+
+/* Function prototypes */
+void execute_command(char *command, char **envp);
+int handle_input(char **command, size_t *len, char **envp);
 
 #endif /* SIMPLE_SHELL_H */
