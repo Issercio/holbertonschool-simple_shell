@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-
 /* Function prototypes */
 void execute_command(char *command, char **envp);
 int handle_input(char **command, size_t *len, char **envp);
