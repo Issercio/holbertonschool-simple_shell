@@ -44,7 +44,7 @@ int handle_input(char **command, size_t *len)
 	/* Si la commande est "exit", terminer le shell */
 	if (strcmp(*command, "exit") == 0) 
     {
-		return (0); /* Quitter le shell */
+		return (127); /* Quitter le shell */
 	}
 
 	/* Exécuter la commande */
