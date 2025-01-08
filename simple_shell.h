@@ -7,22 +7,22 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <stdarg.h>
 
-/* External environment variable */
 extern char **environ;
 
 /* Function prototypes */
-int handle_command(char *command);
+void handle_error(const char *error_message);
+void execute_command(char **argv);
+int handle_input(char **command, size_t *len);
+char *_strdup(const char *str);
+char *find_executable(char *command);
+int _strcmp(const char *s1, const char *s2);
+int _strlen(const char *s);
 void print_env(void);
 char *search_path(char *command, char *full_path);
-void handle_error(const char *error_message);
-
-/* Utility functions */
-int _strlen(char *s);
-int _strcmp(char *s1, char *s2);
-char *_strcpy(char *dest, char *src);
-char *_strdup(char *str);
 int _sprintf(char *str, const char *format, ...);
+char *_strcpy(char *dest, const char *src);
 
-#endif /* SHELL_H */
+#endif /* SIMPLE_SHELL_H */

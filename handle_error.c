@@ -1,12 +1,12 @@
 #include "simple_shell.h"
 
 /**
-* handle_error - Affiche un message d'erreur.
-* @error_message: Le message d'erreur à afficher.
+* handle_error - Displays an error message.
+* @error_message: The error message to display.
 *
-* Cette fonction affiche le message d'erreur fourni.
+* This function prints the provided error message.
 */
 void handle_error(const char *error_message)
 {
-	perror(error_message); /* Affiche l'erreur */
+	perror(error_message); /* Display the error */
 }
