@@ -1,31 +1,37 @@
 #include "simple_shell.h"
 
 /**
-* main - Point d'entrée pour le programme shell.
-* @argc: Le nombre d'arguments passés au shell (non utilisé ici).
-* @argv: Les arguments passés au shell (non utilisés ici).
-*
-* Return: 0 si le shell se termine avec succès.
-*/
+ * main - Entry point for the simple shell.
+ * @argc: Number of arguments passed (not used here).
+ * @argv: Array of arguments passed (not used here).
+ *
+ * Return: Always 0.
+ */
 int main(int argc, char **argv)
 {
 	char *command = NULL;
-
 	size_t len = 0;
-	int running = 1;
+	int status = 1;
 
-	/* Supprimer les avertissements sur les paramètres non utilisés */
 	(void)argc;
 	(void)argv;
 
-	/* Continuer à traiter les entrées tant que l'utilisateur ne quitte pas */
-	while (running)
+	while (status)
 	{
-		running = handle_input(&command, &len);
+		if (isatty(STDIN_FILENO)) /* Interactive mode check */
+			write(STDOUT_FILENO, "#cisfun$ ", 9);
+
+		if (getline(&command, &len, stdin) == -1) /* Handle EOF */
+		{
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+			break;
+		}
+
+		if (command[0] != '\n') /* Ignore empty input */
+			status = handle_command(command);
 	}
 
-	/* Libérer la mémoire allouée pour la commande avant de quitter */
-	free(command);
-
+	free(command); /* Free memory allocated for command */
 	return (0);
 }

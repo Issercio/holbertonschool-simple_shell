@@ -3,17 +3,26 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdarg.h>
 
-/* Accès global aux variables d'environnement */
+/* External environment variable */
 extern char **environ;
 
-/* Déclarations des fonctions */
+/* Function prototypes */
+int handle_command(char *command);
+void print_env(void);
+char *search_path(char *command, char *full_path);
 void handle_error(const char *error_message);
-void execute_command(char *command);
-int handle_input(char **command, size_t *len);
 
-#endif /* SIMPLE_SHELL_H */
+/* Utility functions */
+int _strlen(char *s);
+int _strcmp(char *s1, char *s2);
+char *_strcpy(char *dest, char *src);
+char *_strdup(char *str);
+int _sprintf(char *str, const char *format, ...);
+
+#endif /* SHELL_H */
