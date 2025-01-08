@@ -76,7 +76,7 @@ aurelien@DESKTOP-BLAO4BF:~/holbertonschool-simple_shell$
 
 ### Flowcharts :
 
-# IMAGE
+![Flowcharts](./Simple_shell.png)
 
 #### Files included in the project :
 
