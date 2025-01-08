@@ -1,6 +1,8 @@
 ![](https://sctechit.files.wordpress.com/2019/11/2508a-main-qimg-f129bd338e0940e14bbbc130fe833e83-c.jpeg?w=960&h=1280&crop=1)
 
 
+![version](https://img.shields.io/badge/version-0.0.1-red)
+![shell](https://img.shields.io/badge/Inspected-green)
 
 ### Description 
 
@@ -109,7 +111,7 @@ aurelien@DESKTOP-BLAO4BF:~/holbertonschool-simple_shell$
 - **test_ls_2 :** contient le chemin absolu du programme ls
 
 
-### Author :
+### Authors :
 
 The Simple Shell project was developped by :
 
