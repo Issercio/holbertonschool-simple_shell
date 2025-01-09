@@ -6,39 +6,39 @@
 
 ### Description 
 
-Ce simple shell est une interface shell écrite en langage de programmation C qui affiche un prompt * #cisfun$ * .Ce dépôt contient les fichiers nécessaires pour simuler un shell Unix de base avec ses commandes respectives similaires à celles du premier Shell de Ken Thompson.
+This simple shell is a shell interface written in C programming language that displays a *#cisfun$* prompt. This repository contains the files needed to simulate a basic Unix shell with its respective commands similar to those of Ken Thompson's first Shell.
 
-### Environnement 
+### Environment 
 
 OS : Ubuntu-22.04 
 
 Langage : C
 
-éditeur : Visual Studio Code 1.96
+Editor : Visual Studio Code 1.96
 
-ligne directrice : Betty style
+Guideline : Betty style
 
-### Prescriptions
+### Prescription
 
-Simple-shell est conçu pour fonctionner dans l'environnement linux gcc 11.4.0
+Simple-shell is designed to run in the linux gcc 11.4.0 environment
 
-### Installation compilation et debug 
+### Installation compilation and debug 
 
 
-#### Clone ce depot :
+#### Clone this repository :
 https://github.com/Issercio/holbertonschool-simple_shell.git
 
 #### Compilation : 
 ```
 gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 ```
-#### Execution du simple shell :
+#### Simple shell execution :
 ```
 ./hsh
 ```
 #### Debug :
 
-Si vous souhaitez analyser les erreurs de votre programme, vous pouvez utiliser valgrind.
+If you want to analyze errors in your program, you can use valgrind.
 ```
 valgrind --leak-check=full ./hsh
 ```
@@ -66,15 +66,15 @@ execute_command.c  handle_command.c   handle_input.c  man_1_simple_shell  print_
 aurelien@DESKTOP-BLAO4BF:~/holbertonschool-simple_shell$
 ```
 
-### Description du processus :
+### Process Description :
 
-1) D'abord, le programme crée un processus parent lorsqu'il est lancé par l'utilisateur
+1) First, the program creates a parent process when launched by the user
 
-2) Ensuite, il vérifie si l'entrée vient d'un terminal avec isatty().Si c'est le cas, il affiche l'invite de commande et attend que l'utilisateur entre une commande.
+2) Then it checks if the input comes from a terminal with isatty(). If so, it displays the command prompt and waits for the user to enter a command.
 
-3) Quand l'utilisateur tape une commande, getline() lit la ligne, puis strtok() la découpe en morceaux. Ensuite, un processus enfant est créé avec fork() pour exécuter la commande. Le processus parent attend que le processus enfant termine avant de continuer.
+3) When the user types a command, getline() reads the line, then strtok() breaks it into pieces. Then a child process is created with fork() to execute the command. The parent process waits for the child process to finish before continuing.
 
-4) Enfin, la commande est exécutée avec execve(), la mémoire est libérée avec free(), et l'invite de commande réapparaît pour une nouvelle entrée.
+4) Finally, the command is executed with execve(), the memory is freed with free(), and the command prompt reappears for new input.
 
 ### Flowcharts :
 
@@ -82,34 +82,37 @@ aurelien@DESKTOP-BLAO4BF:~/holbertonschool-simple_shell$
 
 #### Files included in the project :
 
-- **find_executable.c :** Recherche un exécutable dans les répertoires du PATH et retourne son chemin si trouvé, sinon return NULL.
+- **find_executable.c :** Searches for an executable in the PATH directories and returns its path if found, otherwise return NULL.
 
-- **handle_error.c :** affiche un message d'erreur fourni en utilisant la fonction perror()
+- **handle_error.c :** Displays an error message provided using the perror() function
 
-- **hsh :** fichier executable
+- **hsh :** Executable file
 
-- **path.c :** recherche un fichier exécutable dans les répertoires du PATH et retourne son chemin complet si trouvé, sinon NULL.
+- **path.c :** searches for an executable file in the PATH directories and returns its full path if found, otherwise NULL.
 
-- **simple_shell.c :** crée un shell interactif qui lit et exécute les commandes de l'utilisateur, gère les commandes internes comme exit et env, et continue jusqu'à ce que l'utilisateur quitte.
+- **simple_shell.c :** creates an interactive shell that reads and executes the user's commands, handles internal commands like exit and env, and continues until the user exits.
 
-- **str_utils.c :** Implemente deux fonctions : _strcmp pour comparer deux chaînes de caractères et _strlen pour calculer la longueur d'une chaîne.
+- **str_utils.c :** Implements two functions: _strcmp to compare two strings and _strlen to calculate the length of a string.
 
-- **utils.c :** Implemente trois fonctions : _strdup pour dupliquer une chaîne, _strcpy pour copier une chaîne, et _sprintf pour formater une chaîne avec des arguments supplémentaires.
+- **utils.c :** Implements three functions: _strdup to duplicate a string, _strcpy to copy a string, and _sprintf to format a string with additional arguments.
 
-- **execute_command.c :** recherche l'exécutable d'une commande, l'exécute dans un processus enfant, gère les erreurs d'exécution et attend sa fin avant de libérer la mémoire.
+- **execute_command.c :** Finds the executable of a command, executes it in a child process, handles runtime errors, and waits for it to complete before freeing the memory.
 
-- **handle_command.c :** traite la commande de l'utilisateur, gère les commandes internes (exit, env), tokenise la commande, recherche l'exécutable dans le PATH, exécute la commande dans un processus enfant avec execve(), affiche une erreur si la commande est introuvable, et attend la fin du processus enfant avec wait().
+- **handle_command.c :** Processes the user's command, handles internal commands (exit, env), tokenizes the command, searches the PATH for the executable, executes the command in a child process with execve(), displays an error if the command is not found, and waits for the child process to terminate with wait().
 
-- **handle_input.c :** lit l'entrée de l'utilisateur, la traite en la tokenisant en arguments, vérifie si la commande est exit, et exécute la commande ou continue l'exécution du shell.
+- **handle_input.c :** Reads the user's input, processes it by tokenizing it into arguments, checks whether the command is exit, and either executes the command or continues shell execution.
 
 - **man_1_simple_shell :** man page
 
-- **print_env.c :** parcourt et affiche toutes les variables d'environnement ligne par ligne.
+- **print_env.c :** Loops through and displays all environment variables line by line.
 
-- **simple_shell.h :** fichier d'en-tête définit les prototypes des fonctions et inclut les bibliothèques nécessaires pour implémenter un shell simple, ainsi que la déclaration de la variable d'environnement environ.
+- **simple_shell.h :** Header file defines the function prototypes and includes the libraries needed to implement a simple shell, as well as the declaration of the environ environment variable.
 
-- **test_ls_2 :** contient le chemin absolu du programme ls
+- **test_ls_2 :** contains the absolute path of the ls program
 
+### Manpage:
+
+Access the manpage with man_1_simple_shell
 
 ### Authors :
 
@@ -117,10 +120,10 @@ The Simple Shell project was developped by :
 
 
 
-[![Anurag’s github stats](https://github-readme-stats.vercel.app/api?username=Aurelien292)](https://github.com/Aurelien292) ==> L'ensemble des travaux
+[![Anurag’s github stats](https://github-readme-stats.vercel.app/api?username=Aurelien292)](https://github.com/Aurelien292) ==> All the works
 
 
-[![Anurag’s github stats](https://github-readme-stats.vercel.app/api?username=Issercio)](https://github.com/Issercio) ==> L'ensemble des travaux
+[![Anurag’s github stats](https://github-readme-stats.vercel.app/api?username=Issercio)](https://github.com/Issercio) ==> All the works
 
 
 
