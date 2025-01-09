@@ -16,7 +16,7 @@ int handle_input(char **command, size_t *len)
 
     /* Display prompt if interactive */
     if (isatty(STDIN_FILENO))
-        printf(":) ");
+        printf("#cisfun$");
     fflush(stdout);
 
     /* Read user input */
