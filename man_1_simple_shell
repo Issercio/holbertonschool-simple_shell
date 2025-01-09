@@ -188,7 +188,8 @@ Handles the main loop of the shell, reading user input and processing commands.
 
 ## AUTHOR
 
-Written as part of a project to understand UNIX systems programming.
+Jaille Dimitri
+Goaoc Aurélien
 
 ## SEE ALSO
 
