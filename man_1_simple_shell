@@ -1,0 +1,204 @@
+# SIMPLE_SHELL Manual Page
+
+## NAME
+
+**simple_shell** \- A basic UNIX shell implementation.
+
+## SYNOPSIS
+
+**simple_shell**
+
+## DESCRIPTION
+
+**simple_shell** is a minimalistic shell program that allows users to execute commands interactively or through scripts. It supports basic shell functionalities such as executing external commands, handling built-in commands like `exit` and `env`, and searching for executables in the system's PATH.
+
+## FEATURES
+
+- Execute external commands.
+- Built-in commands:
+  - `exit`: Exit the shell.
+  - `env`: Display the environment variables.
+- Support for command-line argument parsing.
+- PATH searching to locate executables.
+
+## USAGE
+
+### Starting the Shell
+Run the compiled executable to start the shell:
+
+    ./hsh
+
+### Compilation
+To compile the shell, use the following command:
+
+    gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
+
+### Interactive Mode
+In interactive mode, the shell displays a prompt (`#cisfun$`) for the user to enter commands. For example:
+
+    #cisfun$ ls -l
+
+### Non-Interactive Mode
+The shell can read commands from a script or standard input. For example:
+
+    echo "ls -l" | ./hsh
+
+### Built-in Commands
+
+- `exit`: Exit the shell. Example:
+
+      #cisfun$ exit
+
+- `env`: Display all environment variables. Example:
+
+      #cisfun$ env
+
+### Error Handling
+If a command is not found, the shell will display:
+
+    <command>: command not found
+
+## IMPLEMENTATION DETAILS
+
+### Functions
+
+#### `execute_command`
+
+**Synopsis:**
+
+    void execute_command(char **argv);
+
+**Description:**
+Executes a user command in a child process. Searches for the command in the PATH and executes it using `execve()`.
+
+**Parameters:**
+- `argv`: Array of arguments for the command.
+
+#### `find_executable`
+
+**Synopsis:**
+
+    char *find_executable(char *command);
+
+**Description:**
+Searches for an executable in the PATH.
+
+**Parameters:**
+- `command`: The command to search for.
+
+**Returns:**
+Full path to the executable if found, otherwise `NULL`.
+
+#### `handle_input`
+
+**Synopsis:**
+
+    int handle_input(char **command, size_t *len);
+
+**Description:**
+Reads user input and processes the command.
+
+**Parameters:**
+- `command`: A pointer to a buffer for storing the user's command.
+- `len`: A pointer to the size of the buffer.
+
+**Returns:**
+`0` to exit the shell, `1` to continue.
+
+#### `handle_command`
+
+**Synopsis:**
+
+    int handle_command(char *command);
+
+**Description:**
+Processes and executes a user command, including built-in commands.
+
+**Parameters:**
+- `command`: The user input command.
+
+**Returns:**
+`1` to continue, `0` to exit the shell.
+
+#### `print_env`
+
+**Synopsis:**
+
+    void print_env(void);
+
+**Description:**
+Prints all environment variables.
+
+#### `search_path`
+
+**Synopsis:**
+
+    char *search_path(char *command, char *full_path);
+
+**Description:**
+Searches for a command in the directories listed in the PATH environment variable.
+
+**Parameters:**
+- `command`: The command to search for.
+- `full_path`: A buffer to store the full path if found.
+
+**Returns:**
+The full path of the executable or `NULL` if not found.
+
+#### Utility Functions
+
+- `_strcmp`: Compares two strings.
+- `_strlen`: Calculates the length of a string.
+- `_strdup`: Duplicates a string.
+- `_strcpy`: Copies a string.
+- `_sprintf`: Formats and stores a string.
+
+### Main Function
+
+The entry point for the shell:
+
+    int main(int argc, char **argv);
+
+**Description:**
+Handles the main loop of the shell, reading user input and processing commands.
+
+## EXIT STATUS
+
+- Returns `0` on successful execution.
+- Returns `127` if a command cannot be executed.
+
+## EXAMPLES
+
+1. Run the shell interactively:
+
+       ./hsh
+       #cisfun$ ls
+
+2. Execute a script:
+
+       ./hsh < script.sh
+
+3. Display environment variables:
+
+       #cisfun$ env
+
+4. Exit the shell:
+
+       #cisfun$ exit
+
+## AUTHOR
+
+Written as part of a project to understand UNIX systems programming.
+
+## SEE ALSO
+
+- `sh(1)`
+- `bash(1)`
+- `execve(2)`
+- `fork(2)`
+- `getline(3)`
+
+## BUGS
+
+No known bugs. Please report any issues to the project repository.
+
